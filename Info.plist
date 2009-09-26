@@ -48,7 +48,9 @@
 			<key>HGSSearchSourceCannotArchive</key>
 			<true/>
 			<key>HGSSearchSourcePivotableTypes</key>
-			<array/>
+			<array>
+				<string>file.application</string>
+			</array>
 		</dict>
 	</array>
 </dict>

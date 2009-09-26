@@ -132,16 +132,31 @@ static HGSAction *_FSScriptItemDefaultAction(void)
 }
 
 #pragma mark Result Filtering
+- (BOOL)isResult:(HGSResult *)result
+     validForApp:(NSString *)otherApp
+           orNil:(BOOL)nilOK
+{
+  NSString *scriptApp = [result valueForKey:kFSAppNameKey];
+  if (scriptApp == nil)
+    return nilOK;
+  return [scriptApp caseInsensitiveCompare:otherApp] == NSOrderedSame;
+}
+
 - (HGSResult *)preFilterResult:(HGSMutableResult *)result
                matchesForQuery:(HGSQuery *)query
                    pivotObject:(HGSResult *)pivotObject
 {
-  NSString *scriptApp = [result valueForKey:kFSAppNameKey];
-  if (scriptApp == nil)
-    return result;
-  NSDictionary *activeDict = [[NSWorkspace sharedWorkspace] activeApplication];
-  NSString *activeApp = [activeDict objectForKey:@"NSApplicationName"];
-  if ([scriptApp caseInsensitiveCompare:activeApp] == NSOrderedSame)
+  NSString *appName = nil;
+  BOOL nilOK = NO;
+  if (pivotObject == nil) {
+    NSDictionary *activeApp = [[NSWorkspace sharedWorkspace] activeApplication];
+    appName = [activeApp objectForKey:@"NSApplicationName"];
+    nilOK = YES;
+  }
+  else {
+    appName = [pivotObject displayName];
+  }
+  if ([self isResult:result validForApp:appName orNil:nilOK])
     return result;
   return nil;
 }
