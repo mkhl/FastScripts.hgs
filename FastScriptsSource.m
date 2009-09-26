@@ -21,17 +21,10 @@ static NSString *const kFSURIFormat = @"FastScripts://FastScripts/%@";
 static NSString *const kFSInvokeAction
   = @"org.purl.net.mkhl.FastScripts.action.invoke";
 
-static NSString *_FSScriptItemPath(FastScriptsScriptItem *script)
+static HGSAction *_FSScriptItemDefaultAction(void)
 {
-  NSMutableArray *names = [NSMutableArray arrayWithObject:[script name]];
-  FastScriptsScriptLibrary *parent = [[script parentLibrary] get];
-  while (parent) {
-    NSString *name = [parent name];
-    parent = [[parent parentLibrary] get];
-    if (parent)
-      [names insertObject:name atIndex:0];
-  }
-  return [NSString pathWithComponents:names];
+  return [[HGSExtensionPoint actionsPoint]
+          extensionWithIdentifier:kFSInvokeAction];
 }
 
 #pragma mark -
@@ -94,29 +87,44 @@ static NSString *_FSScriptItemPath(FastScriptsScriptItem *script)
 }
 
 #pragma mark Result Generation
+- (NSArray *)pathComponentsForScriptItem:(FastScriptsScriptItem *)script
+{
+  NSMutableArray *components = [NSMutableArray arrayWithObject:[script name]];
+  FastScriptsScriptLibrary *parent = [[script parentLibrary] get];
+  while (parent) {
+    NSString *name = [parent name];
+    parent = [[parent parentLibrary] get];
+    if (parent)
+      [components insertObject:name atIndex:0];
+  }
+  return components;
+}
+
 - (void)indexScriptItem:(FastScriptsScriptItem *)script
 {
-  NSString *path = _FSScriptItemPath(script);
+  NSMutableDictionary *attrs = [NSMutableDictionary dictionary];
+  [attrs setObject:script forKey:kFSScriptItemKey];
+  NSArray *pathComponents = [self pathComponentsForScriptItem:script];
+  NSString *name = [script name];
+  NSString *path = [NSString pathWithComponents:pathComponents];
   NSString *uri = [NSString stringWithFormat:kFSURIFormat,
                    [path stringByAddingPercentEscapesUsingEncoding:
                     NSUTF8StringEncoding]];
-  NSString *name = [script name];
   NSString *snip = [path stringByDeletingLastPathComponent];
-  HGSAction *action = [[HGSExtensionPoint actionsPoint]
-                       extensionWithIdentifier:kFSInvokeAction];
-  NSImage *icon = [[NSWorkspace sharedWorkspace]
-                   iconForFile:[[script scriptFile] path]];
-  if (icon == nil)
-    icon = appIcon_;
-  NSDictionary *attrs = NSDICT(script, kFSScriptItemKey,
-                               snip, kHGSObjectAttributeSnippetKey,
-                               icon, kHGSObjectAttributeIconKey,
-                               action, kHGSObjectAttributeDefaultActionKey);
-  [self indexResult:[HGSResult resultWithURI:uri
-                                        name:name
-                                        type:kFSResultType
-                                      source:self
-                                  attributes:attrs]];
+  [attrs setObject:snip forKey:kHGSObjectAttributeSnippetKey];
+  NSURL *file = [script scriptFile];
+  NSImage *icon = appIcon_;
+  if (file)
+    icon = [[NSWorkspace sharedWorkspace] iconForFile:[file path]];
+  [attrs setObject:icon forKey:kHGSObjectAttributeIconKey];
+  HGSAction *action = _FSScriptItemDefaultAction();
+  [attrs setObject:action forKey:kHGSObjectAttributeDefaultActionKey];
+  HGSResult *result = [HGSResult resultWithURI:uri
+                                         name:name
+                                         type:kFSResultType
+                                       source:self
+                                   attributes:attrs];
+  [self indexResult:result];
 }
 
 @end
