@@ -1,0 +1,14 @@
+//
+//  FastScripts_Prefix.pch
+//  FastScripts
+//
+//  Created by mkhl on 26.09.09.
+//  Copyright Martin Kühl 2009. All rights reserved.
+//
+
+
+#ifdef __OBJC__
+  #import <Cocoa/Cocoa.h>
+  #import <Vermilion/Vermilion.h>
+  #import <GTM/GTMDefines.h>
+#endif
