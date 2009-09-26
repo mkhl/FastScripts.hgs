@@ -11,6 +11,7 @@
 
 #pragma mark HGSResult Keys
 extern NSString *kFSScriptItemKey;
+extern NSString *kFSAppNameKey;
 
 #pragma mark HGSResult Type
 extern NSString *kFSResultType;
