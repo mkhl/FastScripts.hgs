@@ -11,6 +11,7 @@
 
 #pragma mark HGSResult Keys
 NSString *const kFSScriptItemKey = @"FastScriptsScriptItem";
+NSString *const kFSAppNameKey = @"FastScriptsAppName";
 
 #pragma mark HGSResult Type
 NSString *const kFSResultType = HGS_SUBTYPE(kHGSTypeScript, @"fastscripts");
@@ -112,6 +113,9 @@ static HGSAction *_FSScriptItemDefaultAction(void)
                     NSUTF8StringEncoding]];
   NSString *snip = [path stringByDeletingLastPathComponent];
   [attrs setObject:snip forKey:kHGSObjectAttributeSnippetKey];
+  if ([pathComponents count] > 2)
+    if ([[pathComponents objectAtIndex:0] isEqualToString:@"Applications"])
+      [attrs setObject:[pathComponents objectAtIndex:1] forKey:kFSAppNameKey];
   NSURL *file = [script scriptFile];
   NSImage *icon = appIcon_;
   if (file)
@@ -125,6 +129,21 @@ static HGSAction *_FSScriptItemDefaultAction(void)
                                        source:self
                                    attributes:attrs];
   [self indexResult:result];
+}
+
+#pragma mark Result Filtering
+- (HGSResult *)preFilterResult:(HGSMutableResult *)result
+               matchesForQuery:(HGSQuery *)query
+                   pivotObject:(HGSResult *)pivotObject
+{
+  NSString *scriptApp = [result valueForKey:kFSAppNameKey];
+  if (scriptApp == nil)
+    return result;
+  NSDictionary *activeDict = [[NSWorkspace sharedWorkspace] activeApplication];
+  NSString *activeApp = [activeDict objectForKey:@"NSApplicationName"];
+  if ([scriptApp caseInsensitiveCompare:activeApp] == NSOrderedSame)
+    return result;
+  return nil;
 }
 
 @end
