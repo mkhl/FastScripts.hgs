@@ -22,16 +22,18 @@ extern NSString *kFSResultType;
 @implementation FastScriptsAction
 
 - (BOOL)performWithInfo:(NSDictionary*)info {
+  BOOL success = NO;
   HGSResultArray *objects = [info objectForKey:kHGSActionDirectObjectsKey];
-  if (isEmpty(objects))
-    return NO;
   for (HGSResult *result in objects) {
     FastScriptsScriptItem *script = [result valueForKey:kFSScriptItemKey];
-    if (script == nil)
+    if (script == nil) {
       HGSLogDebug(@"%@: Missing ScriptItem for Result: %@", self, result);
+      continue;
+    }
     [script invoke];
+    success = YES;
   }
-  return YES;
+  return success;
 }
 
 @end

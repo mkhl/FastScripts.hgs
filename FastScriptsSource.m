@@ -22,12 +22,6 @@ static NSString *const kFSURIFormat = @"FastScripts://FastScripts/%@";
 static NSString *const kFSInvokeAction
   = @"org.purl.net.mkhl.FastScripts.action.invoke";
 
-static HGSAction *_FSScriptItemDefaultAction(void)
-{
-  return [[HGSExtensionPoint actionsPoint]
-          extensionWithIdentifier:kFSInvokeAction];
-}
-
 #pragma mark -
 @interface FastScriptsSource : HGSMemorySearchSource {
  @private
@@ -45,20 +39,20 @@ static HGSAction *_FSScriptItemDefaultAction(void)
 - (id)initWithConfiguration:(NSDictionary *)configuration
 {
   self = [super initWithConfiguration:configuration];
-  if (self == nil)
-    return nil;
-  NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
-  NSString *bundlePath
-    = [workspace absolutePathForAppBundleWithIdentifier:kFSBundleIdentifier];
-  if (bundlePath == nil) {
-    [self release];
-    return nil;
-  }
-  appIcon_ = [[workspace iconForFile:bundlePath] retain];
-  if ([self loadResultsCache]) {
-    [self recacheContentsAfterDelay:10.0];
-  } else {
-    [self recacheContents];
+  if (self) {
+    NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
+    NSString *bundlePath
+      = [workspace absolutePathForAppBundleWithIdentifier:kFSBundleIdentifier];
+    if (bundlePath == nil) {
+      [self release];
+      return nil;
+    }
+    appIcon_ = [[workspace iconForFile:bundlePath] retain];
+    if ([self loadResultsCache]) {
+      [self recacheContentsAfterDelay:10.0];
+    } else {
+      [self recacheContents];
+    }
   }
   return self;
 }
@@ -73,18 +67,18 @@ static HGSAction *_FSScriptItemDefaultAction(void)
 - (void)recacheContents
 {
   [self clearResultIndex];
+  for (FastScriptsScriptItem *script in [[app scriptItems] get]) {
+    [self indexScriptItem:script];
   FastScriptsApplication *app
     = [SBApplication applicationWithBundleIdentifier:kFSBundleIdentifier];
-  for (FastScriptsScriptItem *script in [[app scriptItems] get])
-    [self indexScriptItem:script];
+  }
   [self recacheContentsAfterDelay:60.0];
 }
 
 - (void)recacheContentsAfterDelay:(NSTimeInterval)delay
 {
-  [self performSelector:@selector(recacheContents)
-             withObject:nil
-             afterDelay:delay];
+  SEL action = @selector(recacheContents);
+  [self performSelector:action withObject:nil afterDelay:delay];
 }
 
 #pragma mark Result Generation
@@ -95,8 +89,9 @@ static HGSAction *_FSScriptItemDefaultAction(void)
   while (parent) {
     NSString *name = [parent name];
     parent = [[parent parentLibrary] get];
-    if (parent)
+    if (parent) {
       [components insertObject:name atIndex:0];
+    }
   }
   return components;
 }
@@ -113,15 +108,18 @@ static HGSAction *_FSScriptItemDefaultAction(void)
                     NSUTF8StringEncoding]];
   NSString *snip = [path stringByDeletingLastPathComponent];
   [attrs setObject:snip forKey:kHGSObjectAttributeSnippetKey];
-  if ([pathComponents count] > 2)
-    if ([[pathComponents objectAtIndex:0] isEqualToString:@"Applications"])
+  if ([pathComponents count] > 2) {
+    if ([[pathComponents objectAtIndex:0] isEqualToString:@"Applications"]) {
       [attrs setObject:[pathComponents objectAtIndex:1] forKey:kFSAppNameKey];
+    }
+  }
   NSURL *file = [script scriptFile];
   NSImage *icon = appIcon_;
   if (file)
     icon = [[NSWorkspace sharedWorkspace] iconForFile:[file path]];
   [attrs setObject:icon forKey:kHGSObjectAttributeIconKey];
-  HGSAction *action = _FSScriptItemDefaultAction();
+  HGSAction *action = [[HGSExtensionPoint actionsPoint]
+                       extensionWithIdentifier:kFSInvokeAction];
   [attrs setObject:action forKey:kHGSObjectAttributeDefaultActionKey];
   HGSResult *result = [HGSResult resultWithURI:uri
                                          name:name
@@ -146,19 +144,16 @@ static HGSAction *_FSScriptItemDefaultAction(void)
                matchesForQuery:(HGSQuery *)query
                    pivotObject:(HGSResult *)pivotObject
 {
-  NSString *appName = nil;
-  BOOL nilOK = NO;
+  BOOL valid = NO;
   if (pivotObject == nil) {
     NSDictionary *activeApp = [[NSWorkspace sharedWorkspace] activeApplication];
-    appName = [activeApp objectForKey:@"NSApplicationName"];
-    nilOK = YES;
+    NSString *appName = [activeApp objectForKey:@"NSApplicationName"];
+    valid = [self isResult:result validForApp:appName orNil:YES];
+  } else {
+    NSString *appName = [pivotObject displayName];
+    valid = [self isResult:result validForApp:appName orNil:NO];
   }
-  else {
-    appName = [pivotObject displayName];
-  }
-  if ([self isResult:result validForApp:appName orNil:nilOK])
-    return result;
-  return nil;
+  return valid ? result : nil;
 }
 
 @end
