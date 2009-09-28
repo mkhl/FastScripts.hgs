@@ -29,7 +29,11 @@ static NSString *const kFSInvokeAction
 }
 - (void)recacheContents;
 - (void)recacheContentsAfterDelay:(NSTimeInterval)delay;
-- (void)indexScriptItem:(FastScriptsScriptItem *)script;
+- (void)indexScriptItem:(FastScriptsScriptItem *)script
+   atPathWithComponents:(NSArray *)pathComponents;
+- (void)indexScriptLibrary:(FastScriptsScriptLibrary *)library
+      atPathWithComponents:(NSArray *)pathComponents;
+- (void)indexTopLevelScriptLibrary:(FastScriptsScriptLibrary *)library;
 @end
 
 #pragma mark -
@@ -67,10 +71,10 @@ static NSString *const kFSInvokeAction
 - (void)recacheContents
 {
   [self clearResultIndex];
-  for (FastScriptsScriptItem *script in [[app scriptItems] get]) {
-    [self indexScriptItem:script];
   FastScriptsApplication *app
     = [SBApplication applicationWithBundleIdentifier:kFSBundleIdentifier];
+  for (FastScriptsScriptLibrary *library in [app topLevelScriptLibraries]) {
+    [self indexTopLevelScriptLibrary:library];
   }
   [self recacheContentsAfterDelay:60.0];
 }
@@ -82,33 +86,19 @@ static NSString *const kFSInvokeAction
 }
 
 #pragma mark Result Generation
-- (NSArray *)pathComponentsForScriptItem:(FastScriptsScriptItem *)script
-{
-  NSMutableArray *components = [NSMutableArray arrayWithObject:[script name]];
-  FastScriptsScriptLibrary *parent = [[script parentLibrary] get];
-  while (parent) {
-    NSString *name = [parent name];
-    parent = [[parent parentLibrary] get];
-    if (parent) {
-      [components insertObject:name atIndex:0];
-    }
-  }
-  return components;
-}
-
 - (void)indexScriptItem:(FastScriptsScriptItem *)script
+   atPathWithComponents:(NSArray *)pathComponents
 {
   NSMutableDictionary *attrs = [NSMutableDictionary dictionary];
   [attrs setObject:script forKey:kFSScriptItemKey];
-  NSArray *pathComponents = [self pathComponentsForScriptItem:script];
   NSString *name = [script name];
-  NSString *path = [NSString pathWithComponents:pathComponents];
+  NSString *snip = [NSString pathWithComponents:pathComponents];
+  NSString *path = [snip stringByAppendingPathComponent:name];
   NSString *uri = [NSString stringWithFormat:kFSURIFormat,
                    [path stringByAddingPercentEscapesUsingEncoding:
                     NSUTF8StringEncoding]];
-  NSString *snip = [path stringByDeletingLastPathComponent];
   [attrs setObject:snip forKey:kHGSObjectAttributeSnippetKey];
-  if ([pathComponents count] > 2) {
+  if ([pathComponents count] > 1) {
     if ([[pathComponents objectAtIndex:0] isEqualToString:@"Applications"]) {
       [attrs setObject:[pathComponents objectAtIndex:1] forKey:kFSAppNameKey];
     }
@@ -127,6 +117,24 @@ static NSString *const kFSInvokeAction
                                        source:self
                                    attributes:attrs];
   [self indexResult:result];
+}
+
+- (void)indexScriptLibrary:(FastScriptsScriptLibrary *)library
+      atPathWithComponents:(NSArray *)pathComponents
+{
+  for (FastScriptsScriptItem *script in [library scriptItems]) {
+    [self indexScriptItem:script atPathWithComponents:pathComponents];
+  }
+  for (FastScriptsScriptLibrary *sublibrary in [library scriptLibraries]) {
+    NSString *name = [sublibrary name];
+    NSArray *subpathComponents = [pathComponents arrayByAddingObject:name];
+    [self indexScriptLibrary:sublibrary atPathWithComponents:subpathComponents];
+  }
+}
+
+- (void)indexTopLevelScriptLibrary:(FastScriptsScriptLibrary *)library
+{
+  [self indexScriptLibrary:library atPathWithComponents:[NSArray array]];
 }
 
 #pragma mark Result Filtering
