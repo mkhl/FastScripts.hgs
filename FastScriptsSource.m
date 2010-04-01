@@ -76,6 +76,7 @@ static NSString *const kFSInvokeAction
   for (FastScriptsScriptLibrary *library in [app topLevelScriptLibraries]) {
     [self indexTopLevelScriptLibrary:library];
   }
+  [self saveResultsCache];
   [self recacheContentsAfterDelay:60.0];
 }
 
