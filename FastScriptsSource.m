@@ -112,11 +112,11 @@ static NSString *const kFSInvokeAction
   HGSAction *action = [[HGSExtensionPoint actionsPoint]
                        extensionWithIdentifier:kFSInvokeAction];
   [attrs setObject:action forKey:kHGSObjectAttributeDefaultActionKey];
-  HGSResult *result = [HGSResult resultWithURI:uri
-                                         name:name
-                                         type:kFSResultType
-                                       source:self
-                                   attributes:attrs];
+  HGSResult *result = [HGSUnscoredResult resultWithURI:uri
+                                                  name:name
+                                                  type:kFSResultType
+                                                source:self
+                                            attributes:attrs];
   [self indexResult:result];
 }
 
@@ -149,18 +149,20 @@ static NSString *const kFSInvokeAction
   return [scriptApp caseInsensitiveCompare:otherApp] == NSOrderedSame;
 }
 
-- (HGSResult *)preFilterResult:(HGSMutableResult *)result
+- (HGSResult *)preFilterResult:(HGSResult *)result
                matchesForQuery:(HGSQuery *)query
-                   pivotObject:(HGSResult *)pivotObject
+                  pivotObjects:(HGSResultArray *)pivotObjects
 {
   BOOL valid = NO;
-  if (pivotObject == nil) {
+  if (isEmpty(pivotObjects)) {
     NSDictionary *activeApp = [[NSWorkspace sharedWorkspace] activeApplication];
     NSString *appName = [activeApp objectForKey:@"NSApplicationName"];
     valid = [self isResult:result validForApp:appName orNil:YES];
   } else {
-    NSString *appName = [pivotObject displayName];
-    valid = [self isResult:result validForApp:appName orNil:NO];
+    for (HGSResult *pivot in pivotObjects) {
+      NSString *appName = [pivot displayName];
+      valid = valid || [self isResult:result validForApp:appName orNil:NO];
+    }
   }
   return valid ? result : nil;
 }
