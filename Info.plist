@@ -51,6 +51,8 @@
 			<array>
 				<string>file.application</string>
 			</array>
+			<key>HGSSearchSourceSupportedTypes</key>
+			<string>script.fastscripts</string>
 		</dict>
 	</array>
 </dict>
