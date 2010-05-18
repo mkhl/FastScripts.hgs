@@ -31,7 +31,6 @@
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D48F72B8106DB6B2008D2092 /* FastScriptsBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FastScriptsBridge.h; sourceTree = "<group>"; };
 		D48F72FB106DC476008D2092 /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = /System/Library/Frameworks/ScriptingBridge.framework; sourceTree = "<absolute>"; };
-		D48F7315106E3CD4008D2092 /* Macros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Macros.h; path = MKMacros/Macros.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,7 +107,6 @@
 		32C88E010371C26100C91783 /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
-				D48F7315106E3CD4008D2092 /* Macros.h */,
 				D48F72B8106DB6B2008D2092 /* FastScriptsBridge.h */,
 				8B0D217D0F796E1C00FD4A12 /* HGSBundle.m */,
 				7F8450F40F6B1F7B000CD5C1 /* QSBDebug.xcconfig */,

@@ -7,7 +7,6 @@
 
 #import <Vermilion/Vermilion.h>
 #import "FastScriptsBridge.h"
-#import "Macros.h"
 
 #pragma mark HGSResult Keys
 NSString *const kFSScriptItemKey = @"FastScriptsScriptItem";
