@@ -5,7 +5,7 @@
 //  Licensed under the MIT License.
 //
 
-#import "FastScriptsBridge.h"
+#import "FastScriptsSource.h"
 
 #pragma mark HGSResult Keys
 NSString *const kFSScriptItemKey = @"FastScriptsScriptItem";

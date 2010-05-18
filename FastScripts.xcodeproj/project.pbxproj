@@ -29,6 +29,7 @@
 		8BAA94490F7A6EBC00DF4F12 /* LoadableBundle.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = LoadableBundle.xcconfig; path = "externals/google-toolbox-for-mac/XcodeConfig/Target/LoadableBundle.xcconfig"; sourceTree = QSBSRCROOT; };
 		8D5B49B6048680CD000E48DA /* FastScripts.hgs */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FastScripts.hgs; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D471F01B116693D4003B491C /* FastScriptsSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FastScriptsSource.h; sourceTree = "<group>"; };
 		D48F72B8106DB6B2008D2092 /* FastScriptsBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FastScriptsBridge.h; sourceTree = "<group>"; };
 		D48F72FB106DC476008D2092 /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = /System/Library/Frameworks/ScriptingBridge.framework; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
@@ -80,6 +81,7 @@
 			isa = PBXGroup;
 			children = (
 				7F38DCE00F6864D90051B7E3 /* FastScriptsSource.m */,
+				D471F01B116693D4003B491C /* FastScriptsSource.h */,
 				7F38DCE20F6864D90051B7E3 /* FastScriptsAction.m */,
 			);
 			name = Classes;
