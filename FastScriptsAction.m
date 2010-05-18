@@ -12,17 +12,15 @@
 
 @implementation FastScriptsAction
 
-- (BOOL)performWithInfo:(NSDictionary*)info {
+- (BOOL)performWithInfo:(NSDictionary *)info {
   BOOL success = NO;
   HGSResultArray *objects = [info objectForKey:kHGSActionDirectObjectsKey];
   for (HGSResult *result in objects) {
     FastScriptsScriptItem *script = [result valueForKey:kFSScriptItemKey];
-    if (script == nil) {
-      HGSLogDebug(@"%@: Missing ScriptItem for Result: %@", self, result);
-      continue;
+    if (script) {
+      [script invoke];
+      success = YES;
     }
-    [script invoke];
-    success = YES;
   }
   return success;
 }
