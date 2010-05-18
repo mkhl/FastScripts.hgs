@@ -5,7 +5,6 @@
 //  Licensed under the MIT License.
 //
 
-#import <Vermilion/Vermilion.h>
 #import "FastScriptsBridge.h"
 
 #pragma mark HGSResult Keys
