@@ -1,7 +1,7 @@
 //
 //  FastScriptsSource.m
 //
-//  Copyright (c) 2009  Martin Kuehl <purl.org/net/mkhl>
+//  Copyright (c) 2009-2010  Martin Kuehl <purl.org/net/mkhl>
 //  Licensed under the MIT License.
 //
 
